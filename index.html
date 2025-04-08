@@ -1,1 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blend PFP Maker</title>
+    <!-- Include Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0b0b; /* Black background */
+            font-family: 'Inter', sans-serif; /* Inter font for entire page */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
+        .container {
+            background-color: transparent; /* Transparent background to show body's #0b0b0b */
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .symbol-img {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+        }
+
+        h1 {
+            color: #ffffff; /* White text */
+            font-size: 2.5em;
+            margin: 0;
+            font-weight: 700; /* Bold for title */
+        }
+
+        p {
+            color: #ffffff; /* White text */
+            font-size: 0.9em;
+            margin: 10px 0 20px;
+            font-weight: 400; /* Regular weight for description */
+        }
+
+        canvas {
+            border: 2px solid #000;
+            background-color: #fff;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .upload-btn, .download-btn {
+            display: inline-block;
+            background-color: #49eded; /* Cyan button color */
+            color: #000000; /* Black text on buttons */
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif; /* Inter font for buttons */
+            font-weight: 400;
+        }
+
+        .upload-btn:hover, .download-btn:hover {
+            background-color: #3ed1d1; /* Slightly darker cyan on hover */
+        }
+
+        select {
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            font-family: 'Inter', sans-serif; /* Inter font for dropdown */
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="symbol.png" alt="Symbol" class="symbol-img">
+        <h1>Blend PFP Maker</h1>
+        <p>Upload your profile picture, select a border, and we'll place it within the chosen template. Download and set your new profile picture to show your support for the Blend ecosystem</p>
+        <canvas id="canvas" width="300" height="300"></canvas>
+        <div class="button-row">
+            <select id="borderSelect" onchange="applyChanges()">
+                <option value="border1.png">Border 1</option>
+                <option value="border2.png">Border 2</option>
+                <option value="border3.png">Border 3</option>
+                <option value="border4.png">Border 4</option>
+                <option value="border5.png">Border 5</option>
+                <option value="border6.png">Border 6</option>
+            </select>
+            <label for="imageUpload" class="upload-btn">
+                Upload
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+            </label>
+            <a href="#" id="downloadBtn" class="download-btn" onclick="downloadImage()">Download</a>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let image = new Image();
+        const border = new Image();
+        let currentBorder = 'border1.png'; // Default border
+        border.src = currentBorder; // Preload the default border
+
+        // Update border when selection changes
+        document.getElementById('borderSelect').addEventListener('change', function() {
+            currentBorder = this.value;
+            border.src = currentBorder;
+            applyChanges();
+        });
+
+        // Load the uploaded image
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                image.src = event.target.result;
+                image.onload = function() {
+                    applyChanges();
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function applyChanges() {
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the user's image with aspect ratio preserved
+            if (image.src) {
+                const imgAspect = image.width / image.height;
+                const canvasAspect = canvas.width / canvas.height;
+                let drawWidth, drawHeight, offsetX, offsetY;
+
+                if (imgAspect > canvasAspect) {
+                    // Image is wider than canvas
+                    drawWidth = canvas.width;
+                    drawHeight = canvas.width / imgAspect;
+                    offsetX = 0;
+                    offsetY = (canvas.height - drawHeight) / 2;
+                } else {
+                    // Image is taller than canvas
+                    drawHeight = canvas.height;
+                    drawWidth = canvas.height * imgAspect;
+                    offsetX = (canvas.width - drawWidth) / 2;
+                    offsetY = 0;
+                }
+
+                ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+            }
+
+            // Draw the selected border on top
+            if (border.src) {
+                ctx.drawImage(border, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Download the final image
+        function downloadImage() {
+            const link = document.getElementById('downloadBtn');
+            link.download = 'my-pfp.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
