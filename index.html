@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blend PFP Maker</title>
+    <title>Fluent PFP Generator</title>
     <!-- Include Inter font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -29,11 +29,19 @@
         }
 
         .symbol-img {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
+            display: block;
+            margin: 0 auto 20px; /* Center horizontally, add space below */
+            width: 60px;
+            height: 60px;
+        }
+
+        /* Responsive adjustments for mobile */
+        @media (max-width: 600px) {
+            .symbol-img {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 15px; /* Slightly less margin on mobile */
+            }
         }
 
         h1 {
@@ -102,8 +110,8 @@
 <body>
     <div class="container">
         <img src="symbol.png" alt="Symbol" class="symbol-img" onerror="console.error('Failed to load symbol.png')">
-        <h1>Blend PFP Maker</h1>
-        <p>Upload your profile picture, select a border, and we'll place it within the chosen template. Download and set your new profile picture to show your support for the Blend ecosystem</p>
+        <h1>Fluent PFP Generator</h1>
+        <p>You’re not 100% blended without a Blended PFP. Upload your PFP, select your favorite template and set your new pfp to become fully blended.</p>
         <canvas id="canvas" width="300" height="300"></canvas>
         <div class="button-row">
             <select id="borderSelect" onchange="applyChanges()">
