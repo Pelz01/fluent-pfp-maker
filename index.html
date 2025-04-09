@@ -10,7 +10,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #0b0b0b; /* Black background */
+            background: linear-gradient(to right, #32FE6B 0%, #064400 75%); /* Smooth gradient with #064400 more dominant */
             font-family: 'Inter', sans-serif; /* Inter font for entire page */
             display: flex;
             justify-content: center;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            background-color: transparent; /* Transparent background to show body's #0b0b0b */
+            background-color: #0b0b0b; /* Black background for container */
             padding: 20px;
             border-radius: 10px;
             text-align: center;
@@ -67,7 +67,7 @@
 
         .upload-btn, .download-btn {
             display: inline-block;
-            background-color: #49eded; /* Cyan button color */
+            background-color: #ffffff; /* White background for buttons */
             color: #000000; /* Black text on buttons */
             padding: 10px 20px;
             border-radius: 5px;
@@ -79,21 +79,29 @@
         }
 
         .upload-btn:hover, .download-btn:hover {
-            background-color: #3ed1d1; /* Slightly darker cyan on hover */
+            background-color: #e0e0e0; /* Slightly darker white on hover */
         }
 
         select {
-            padding: 10px;
+            padding: 10px; /* Uniform padding */
             font-size: 1em;
             border-radius: 5px;
-            font-family: 'Inter', sans-serif; /* Inter font for dropdown */
+            font-family: 'Inter', sans-serif;
             font-weight: 400;
+            width: 120px; /* Fixed width */
+            text-align: center; /* Center the text */
+            appearance: none; /* Remove native arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') no-repeat center right 10px; /* Custom arrow */
+            background-size: 12px; /* Size of the arrow */
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="symbol.png" alt="Symbol" class="symbol-img">
+        <img src="symbol.png" alt="Symbol" class="symbol-img" onerror="console.error('Failed to load symbol.png')">
         <h1>Blend PFP Maker</h1>
         <p>Upload your profile picture, select a border, and we'll place it within the chosen template. Download and set your new profile picture to show your support for the Blend ecosystem</p>
         <canvas id="canvas" width="300" height="300"></canvas>
@@ -118,14 +126,32 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let image = new Image();
-        const border = new Image();
         let currentBorder = 'border1.png'; // Default border
-        border.src = currentBorder; // Preload the default border
+
+        // Preload all border images
+        const borderImages = {};
+        const borderFiles = [
+            'border1.png',
+            'border2.png',
+            'border3.png',
+            'border4.png',
+            'border5.png',
+            'border6.png'
+        ];
+
+        // Load all border images when the page loads
+        borderFiles.forEach(file => {
+            const img = new Image();
+            img.src = file;
+            img.onerror = function() {
+                console.error('Failed to load border image:', file);
+            };
+            borderImages[file] = img; // Store preloaded image in object
+        });
 
         // Update border when selection changes
         document.getElementById('borderSelect').addEventListener('change', function() {
             currentBorder = this.value;
-            border.src = currentBorder;
             applyChanges();
         });
 
@@ -137,6 +163,9 @@
                 image.src = event.target.result;
                 image.onload = function() {
                     applyChanges();
+                };
+                image.onerror = function() {
+                    console.error('Failed to load uploaded image');
                 };
             };
             reader.readAsDataURL(file);
@@ -169,9 +198,15 @@
                 ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
             }
 
-            // Draw the selected border on top
-            if (border.src) {
-                ctx.drawImage(border, 0, 0, canvas.width, canvas.height);
+            // Draw the selected border on top using the preloaded image
+            const selectedBorder = borderImages[currentBorder];
+            if (selectedBorder && selectedBorder.complete) {
+                ctx.drawImage(selectedBorder, 0, 0, canvas.width, canvas.height);
+            } else {
+                console.warn('Border image not yet loaded:', currentBorder);
+                selectedBorder.onload = function() {
+                    ctx.drawImage(selectedBorder, 0, 0, canvas.width, canvas.height);
+                };
             }
         }
 
@@ -182,6 +217,9 @@
             link.href = canvas.toDataURL('image/png');
             link.click();
         }
+
+        // Initial render with default border
+        applyChanges();
     </script>
 </body>
 </html>
